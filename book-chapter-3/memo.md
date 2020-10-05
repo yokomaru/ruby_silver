@@ -230,3 +230,350 @@ irb(main):142:0> p 1 and 2
 p (1 and 2)
 
 # 文字列
+- 書式として妥当か
+- 式展開ができるか
+a = "ab"
+p a #=> "ab"
+p a.class #=> String
+b = "ab" 'cd' #=> "abcd"
+
+- ダブルクォーテでかこむと式展開ができる、シングルはできない
+- #{}
+
+a = 1
+p "ああ#{a}" => "ああ1"
+=> 任意の値をto_sメソッドが呼ばれる。to_sはクラスによって異なる。
+aはFixnumクラスのto_sは10進数で返す
+p 'ああ#{a}' => "ああ\#{a}"
+
+## 数値
+"100".to_i 100
+"1.9".to_f 1.9
+"5/2".to_r (5/2)
+"1+2i".to_c (1+2i)
+"12ab3".to_i 12
+"12ab3".to_f 12.0
+"1.9".to_i 1.9
+"1.9.9".to_f 1.9
+
+途中で文字列などがあればそれ以降は評価されない
+
+##　バックスラッシュ記法
+" はできる
+ASCIIの(0x51)はJISでは(JIS X 0201)がわりあてられている
+\x xの文字
+\n 改行
+\r　キャリッジリターン
+\f　改ページ
+\a ベル
+\e　エスケープ
+\s スペース
+\b バックスペース
+\t タブ
+\v　垂直タブ
+\nnn ８進数
+\xnn 16進数
+\cx コントロール文字
+\C-x コントロール文字
+\M-x メタx
+\M-\C-x メタコントロール
+\unnnn Unicode文字(0-9 a-f A-F)
+\u{nnnn} Unicode文字(0-9 a-f A-F) 1~6桁まで スペースかタブ区切りで複数指定
+
+8進数
+ p "\101" #=> "A"
+16進数
+ p "\x41" #=> "A"
+
+バックスラッシュを表示
+print
+puts
+
+p "a\nb"
+puts "a\nb"
+print "a\nb"
+
+p "a\nb"
+"a\nb"
+=> "a\nb"
+
+puts "a\nb"
+a
+b
+=> nil
+
+print "a\nb"
+a
+b=> nil
+
+p　はデバッグよう
+文字列をダブルクォーとで囲んだり、アレイを鍵かっこで見せたりなど
+
+p 引数ごとに改行 inspect そのまま
+print 改行しない to_s　適用
+puts 引数ごとに改行 to_s　適用
+
+p "\x61"
+p "\x0a"
+
+p "\x61"
+"a"
+=> "a"
+p "\x0a"
+
+"\n"
+=> "\n"
+
+p '\x61'
+p '\x0a'
+
+' シングルクォーテおとバックスラッシュのエスケープが表示される
+p '\x61'
+"\\x61"
+=> "\\x61"
+
+ p '\x0a'
+"\\x0a"
+=> "\\x0a"
+
+###　ヒアドキュメント
+- 式展開やバックスラッシュが簡単にできる
+<< の後に任意の識別し
+query = <<SQL
+select *
+from my_table;
+  SQL
+query #=> "select * \nfrom my_table;\n"
+- 終端をしめす識別子の前にはスペースだめ
+- <<- でスペースあってもOK
+query = <<-SQL
+select *
+from my_table;
+  SQL
+query
+
+- シングルにしたい場合
+query = <<-'SQL'
+select *
+from my_table;
+  SQL
+query
+- "select * \nfrom my_table;\n"
+
+ダブルクオートで囲むことで明示できる
+query = <<-"SQL"
+select *
+from my_table;
+  SQL
+query
+
+# ％記法
+% でやれば文字列をかこむ文字を指定できる
+a =%*aaaa*
+a
+
+a =%*aaaa* # => "aaaa"
+a #=> "aaaa"
+
+文字の中でダブルクォーテつかいたい時などに使える
+a =%*aaaa"aaaa"*
+a # => "aaaa\"aaaa\""
+
+a = %[test]
+a
+
+a = 1
+%q　シングル　%Q ダブル
+%q!#{a + 1}! #=> "\#{a + 1}"
+%Q?#{a + 1}? #=> "2"
+
+### 文字列の連結
+a = "ru" + "by" "ruby"
+a * 3 "rubyrubyruby"
+3 * a #TypeError (String can't be coerced into Integer)
+
+加算丈さんできる
+
+a = "ru"
+p a << "by"
+p a => "ruby"
+末尾に連携する時は<<できる。破壊的メソッド
+
+エンコードはUTF8
+異なるエンコードはむり
+a = "ルビー"
+a.encoding  #<Encoding:UTF-8>
+b = a.encode("SJIS")
+b.encoding #<Encoding:Windows-31J>
+a + b #Encoding::CompatibilityError
+
+## 比較
+"a" < "b" => true
+"ab" < "ac" => true
+"Ab" < "Ab" => false
+"Ab" == "Ab" => true
+"Ab" <=> "Ab" = 0
+
+## 文字列
+"abcde".length　=> 5
+"日本語".length　=> 3
+
+## フォーマット
+進数
+sprintf("result: %#b", 16)
+=> "result: 0b10000"
+sprintf("result: %#o", 16)
+=> "result: 020"
+sprintf("result: %#x", 16)
+=> "result: 0X10"
+sprintf("result: %#X", 16)
+=> "result: 0X10"
+桁数
+
+sprintf("result: %#02d", 1)
+=> "result: 01"
+sprintf("result: %#03d", 1)
+=> "result: 001"
+sprintf("result: %#05.2f", 1.1111)
+=> "result: 01.11"
+
+aprintfは文字列の%と一緒になる
+
+"result: %#02d" % 1
+=> "result: 01"
+"result: %#03d" % 1
+=> "result: 001"
+"result: %#05.2f" % 1.1111
+=> "result: 01.11"
+
+# シンボル
+- シンボルは文字列の先頭にころん "を省略できる
+
+foo1 = :"foo1" => :foo1
+foo2 = :"#{foo1}foo2" => :foo1foo2
+foo3 = :'foo3' => :foo3
+foo4 = :foo4 => :foo4
+
+%s[foo1] => :foo1
+%s?foo2? => :foo2
+
+生成されたのはシンボルクラスのインスタンス
++とかは定義されてない
+一度文字列を生成してあげる
+to_symでシンボルに
+v1 = "foo1" => "foo1"
+v2 = v1.to_sym => :foo1
+v3 = v2.to_s => "foo1"
+
+## オブジェクトの同値性と同一性
+- 数値や文字列などのリテラすを指定する
+- Rubyのインタプリタはリテラルに対応するクラスのインスタンスをｓ悪性
+- 全部オブジェクトでオブジェクトIDを持つ　一位のオブジェクトID
+文字列リテラルでは毎回新たに作る
+シンボルは同じ値を参照するので変わらない
+2.3以降ではfrozen_string_literal:trueで同じ内容の文字列は同一のオブジェクト返すようにする
+
+p "foo1".object_id => 70108496254080
+p "foo1".object_id => 70108496226340
+
+p :foo1.object_id => 1519068
+p :foo1.object_id => 1519068
+p :foo2.object_id => 1519388
+
+シンボルは内部では整数なので処理が早くなるラベルの場合はシンボル
+2.2以降ではガベージコレクション
+equal? 2つのオブジェクトが同一かどうか
+
+"foo1" == "foo1"
+=> true
+"foo1".equal?("foo1")
+=> false
+:foo1 == :foo1
+=> true
+:foo1.equal?(:foo1)
+=> true
+
+==とeql?は一緒
+
+数値は == 整数と浮動小数点数は一緒
+eql?型も見る　厳密に見る
+"foo1".eql? "foo1"
+=> true
+1.0 == 1
+=> true
+(1.0).eql? 1
+=> false
+(1.0).eql? 1.0
+=> true
+
+リテラルを指定すると対応するオブジェクおがメモリ上に生成される
+変数を宣言すると変数にオブジェクトの参照が与えられる
+v1　= "foo1" => "foo1"
+v2 = v1 => "foo1"
+v1.equal? v2 => true
+
+大部分は再代入になるので元の値には影響ない
+v1 = "foo1"
+v2 = v1
+v1 += "foo2"
+p v1 => "foo1foo2"
+p v2 => "foo1"
+
+メソッドの引数も一緒
+実引数に指定された変数の参照が仮引数にコピーされる
+
+def func v1
+  v1.object_id
+end
+
+v1 = "foo1"
+p v1.object_id => 70118948659940
+p func(v1) => 70118948659940
+
+# メソッドの内部で作成した亜値は本スコープに含まれる
+# 外部は直接参照できない
+
+def func v1
+  v1.object_id
+end
+
+v1 = "foo1"
+p v1.object_id => 70118948659940
+p func(v1) => 70118948659940
+
+# 事故代入しても実引数には影響なし
+def func v1
+  v1 += "foo2"
+end
+
+v1 = "foo1"
+p func v1 => "fo
+
+
+v1 = "foo1" => "foo1"
+v2 = v1 => "foo1"
+p v1.chop => "foo"
+p v2  "foo1"
+p v1.chop! => "foo"
+p v2 => "foo"
+chopは最後の文字列を取り除いた文字れてう
+参照先にも影響を与えている!
+concatなど破壊的なやつもいる
+最近のライブラリでは破壊的メソッドではないが注意せえよ！もある
+v1="foo"
+v2="foo"
+v3="foo"
+
+p v1.object_id => 70118948440840
+p v2.object_id => 70118948680340
+p v3.object_id => 70118948698500
+
+v1= :foo => 1518428
+v2=:foo => 1518428
+v3=:foo => 1518428
+
+p v1.object_id
+p v2.object_id
+p v3.object_id
+
+v1.chop
