@@ -856,3 +856,499 @@ end while (0..4) === i
 修飾詞としても記述できる(if的な)
 i = 0
 p i += 1 while (0..4) === i
+
+## 正規表現とコマンド
+/で囲むと正規表現
+/Ruby/ #=> /Ruby/
+%r(Ruby) #=> /Ruby/
+Regexp.new "Ruby" #=> /Ruby/
+
+# ===
+指定した文字列とマッチしているかどうか論理値で返す
+ /Ruby/ === "I love Ruby" #=> true
+
+ === caseで
+
+ p case "I love Ruby"
+ when /Ruby/ then; "Ruby!"
+ when /Java/ then; "Java!"
+ end #=> "Ruby!"
+
+# =~
+- マッチした箇所を取得 マッチしなかったらnil
+  /Ruby/ =~ "I love Ruby" #=> 7
+  "I love Ruby" =~ /Ruby/ #=> 7
+- =~同じスコープで組込変数を「$&」を参照する。
+  - マッチした文字列より前の文字列を参照するには「$`」
+  - マッチした後の文字列「＄'」
+  - マッチ順は`&'
+  /bb/ =~ "aabbcc"
+  p $` #=> "aa"
+  p $& #=> "bb"
+  p $' #=> "cc"
+
+- マッチするとは
+  - 正規表現でR u b yというよう箱が用意されて、判定する文字が一文字ずつ送られる
+  - 判定はマッチしないと全部からになる
+  - 全部の箱が埋まってたらマッチ
+  - 正規表現^は頭 行末は$
+  - /^bb$/ =~ "aabbcc" #=> nil
+  - 並列って感じ|
+    - reg = /^(aa|bb)c$/
+    - reg === "aac" # => true
+    - reg === "bbc" #=> true
+  - [] 文字列の集合を指定できる
+    - reg = /a[bcd]e[fg]h/
+    - bcdかfgのどれか
+    - reg === "abegh" #=> true
+## 正規表現記号とオプション
+- -を使うと一気に指定できる
+- /a[1-5]z/ === "a2z" #=> true
+- /a[b-d]z/ === "abz" #=> true
+
+- 正規表現記号
+  - .  改行を除く任意の一文字 mオプションが指定された場合は改行もマッチ
+  - \d 数字
+  - \D 数字以外の文字
+  - \w 英数字と_
+  - \W 英数字と_ 以外
+  - \s 空白文字(/t, /n, /r, /f)
+  - \S 空白文字(/t, /n, /r, /f)以外
+  - \A 先頭の文字、改行の有無に影響されない
+  - \z 末尾の文字、改行の有無に影響されない
+  - \Z 末尾の文字、改行があればその改行の直前にマッチ
+  - /a\db/ === "a2b" #=> true
+- 繰り返し
+ - *
+   - 直前の文字の0回以上の繰り返し
+   /a*b/ === "ab" #=> true
+   /a*b/ === "aab" #=> true
+   /a*b/ === "aaab" #=> true
+ - +
+   - 直前の文字の1回以上の繰り返し
+   /a+b/ === "aab"  #=> true
+   /a+b/ === "aaab" #=> true
+ - {m}
+   - 直前の文字のm回の繰り返し
+   /a{2}b/ === "aab" #=> true
+ - {m,}
+   - 直前の文字の最低m回の繰り返し
+   /a{2,}b/ === "aab" #=> true
+ - {m,n}
+   - 直前の文字の最低m回、最高n会の繰り返し
+   /a{2,3}b/ === "aab"  #=> true
+  - /a(bc)*d/ === "abcbcd"
+ - グループ化した正規表現にマッチした結果は特殊変数$1、$2、$3といった$数字で取り出すことができる　正規表現の後＄方参照
+
+%r|(http://www(\.)(.*)/)| =~ "http://www.xyz.org/" #=> 0
+$1 #=> "http://www.xyz.org/" :http://で始まる
+$2 #=> "." :wwwの次のピリオド
+$3 #=> "xyz.org" www.の次の任意の文字の０位上
+$4 #=> nil nil
+$0はスクリプト名
+# 正規表現オプpション
+- i 大文字小文字区別しない
+- o一度だけ式展開を使い
+- x パターン中の空白と改行を無視するまた、#移行をコメントとして無視する
+- m 正規表現記号が改行にもマッチする
+/ruby/ === "RUBY" #=> false
+/ruby/i === "RUBY" #=> false
+/a.*b/ === "a\nb" # => false
+/a.*b/m === "a\nb" #=> false]
+
+#　コマンド出力
+- バッククォーテおで囲まれた文字列はコマンドとして解釈されOSニワタサレテジッコウサレル
+- $?
+
+puts `date +%Y/%m/%d` 今日の日付
+
+# ブロックとPROC
+- kuro-ja
+
+def func x
+  x + yield
+end #=> :func
+p func(1){2} #=> 3
+ブロックの実行結果yield
+ブロックはスコープを生成する
+
+def func y
+  y + yield
+end
+
+func (1) do
+  x = 2
+end
+
+p x #NameError
+
+- ブロックの実行中にブロックの中で変数xに値を代入している。元のスコープとは別の場所に確保されるので于bロックの外からは参照できない
+
+- ブロックは波かっこ{}の代わりにdo endで記述できます(１行か複数)
+
+- クロージャとしてのブロック
+def func y
+  y + yield
+end
+x = 2
+p func(1) {x+=2}　#=> 5
+p x #=> 4
+
+- ブロックの外でxに２を代入
+メソッドに無特区わたす
+xを更新xは武録の外のと一緒
+
+- 値ではなく変数そのもが共有されるてん
+対応付はユーザが指定でいない束縛という 環境の束縛クロージャ
+クロージャ　遅延評価や公開かんすうなど様々な場面で使える
+クロージャｇ呼び出し元の変数を処理に持ち込む手段
+
+# ブロックのフォーマットと判例
+def func a,b
+  a + yield(b, 3)
+end
+
+p func(1,2){|x,y| x + y }
+=> 6
+
+# ブロックはんてい
+def func
+  return 1 if block_given?
+  2
+end
+
+p func(){} #=> 1
+p func #=> 2
+
+# Proc
+- ブロックをオブジェクトとして使いたい場合はProc使う　ブロックをobjエクトとして使う場合
+Procのコンストラクタに無特区を指定する
+proc = Proc.new{|x| p x}
+=> #<Proc:0x00007ffcb38e2580@(irb):149>
+proc.call(1)
+=> 1
+
+# カウンタで初期値がプログラムの冒頭で決定し、あとで操作する。
+
+def get_counter start
+  Proc.new{|up| start += up}
+end
+=> :get_counter
+count_up = get_counter(1)
+=> #<Proc:0x00007ffcb38143b0@(irb):152>
+count_up.call(1)
+
+irb(main):156:0> count_up.call(1)
+=> 2
+irb(main):157:0> count_up.call(1)
+=> 3
+irb(main):158:0> count_up.call(1)
+=> 4
+irb(main):159:0> count_up.call(1)
+=> 5
+irb(main):160:0> count_up.call(1)
+=> 6
+
+# Procとブロックを相互に変換する方法を見ていきましょう
+
+def func x
+  x + yield
+end
+
+proc = Proc.new{2}
+func(1, &proc)
+
+irb(main):161:0> def func x
+irb(main):162:1>   x + yield
+irb(main):163:1> end
+=> :func
+irb(main):164:0>
+irb(main):165:0> proc = Proc.new{2}
+func(1, &proc)=> #<Proc:0x00007ffcb38586f0@(irb):165>
+irb(main):166:0> func(1, &proc)
+=> 3
+
+- procオブジェクトとして受け取るには&をつけた引数でprodオブジェクトを参照できる
+
+def func x, &proc
+  x + proc.call
+end
+
+func(1) do
+  2
+end #=> 3
+# lamnbda
+- lambdaはProcインスタンスを生成ますうがProcとは異なる動きします
+lmd = lambda{|x| p x}
+=> #<Proc:0x00007ffcb0149c40@(irb):203 (lambda)>
+lmd = -> (x) { p x }
+=> #<Proc:0x00007ffcb3863bb8@(irb):204 (lambda)>
+lmd.call(1) => 1
+上のように作成したProcインスタンスはlambdaと呼ばれ、
+おブジェクトかされていない分proc.newで作成されたインスタンスよりもメソッドに近い
+procはreturnでスコープをサッシュつ
+lambdaはreturnすると呼び出し元に復帰する
+procはfuncも終了している
+
+def func
+  proc = Proc.new{return 1}
+  proc.call
+  2
+end
+=> 1
+def func
+  proc = lambda{return 1}
+  proc.call
+  2
+end
+=> 2
+
+p1 = Proc.new{|x ,y| y}
+p1.call(1)
+=> nil
+ p1.call(1,2)
+=> 2
+
+p1 = lambda{|x ,y| y}
+p1.call(1) #ArgumentErrorメソっどぉ同じ
+
+p1 = ->(x,y){p x + y}
+p1.call(1,2) #=> 3
+配列の走査
+[1,2,3].each do |value|
+  value
+end => [1, 2, 3]
+
+[3,4,5].each_with_index do |value, index|
+  p value + index
+end
+
+3
+5
+7
+
+{:a => 1, :b =>2 }.each do |key, value|
+  p "#{key}:#{value}"
+end
+
+"a:1"
+"b:2"
+
+{:a => 1, :b =>2 }.each_key do |key|
+  p "#{key}"
+end
+"a"
+"b"
+
+{:a => 1, :b =>2 }.each_value do |value|
+  p "#{value}"
+end
+"1"
+"2"
+
+{:a => 1, :b =>2 }.each_key do |key|
+  "#{key}"
+end
+
+("a"..."z").each do |value|
+  p value
+end
+
+2.upto(5).each do |i|
+  p i
+end
+2
+3
+4
+5
+
+5.downto(2).each do |i|
+  p i
+end
+5
+4
+3
+2
+
+4.times do |i|
+  p i
+end
+0
+1
+2
+3
+=> 4
+
+# スレッド
+thread
+
+t = Thread.new do
+  p "start"
+  sleep 5
+  p "end"
+end
+
+p "wait"
+t.join
+
+3.times do |i|
+  Thread.start(i) do |index|
+    p "thread-#{index} start"
+  end
+end
+sleep 1
+
+# ファイバ
+- 複数のタスクをきりかえ、並行処理する機能
+- スレッドはOSトカ切り替えるが、ファイバはプログラマが切り替える
+
+f = Fiber.new do
+  (1..3).each do |i|
+    Fiber.yield i
+  end
+  nil
+end
+
+p f.resume 1 # ファイバに処理が移す　yieldが呼ばれると戻る　戻り値は引数を返す
+p f.resume 2 # 続きから実行される
+p f.resume 3 #
+p f.resume nil # ファイバを抜けるかnil
+p f.resume FiberError # それ以外はエラー
+
+# 脱出公文と例外処理、大域脱出
+## 脱出公文
+- break continue next redo
+next はちゅだんredoは現在の会を口返す
+
+10.times do |i|
+  next if i == 5
+  print i, " "
+end
+-  0 1 2 3 4 6 7 8 9 => 10 #5がとぶ
+
+10.times do |i|
+  redo if i == 5
+  print i, " "
+end
+
+# 例外処理
+raise ArgumentError, "引数が不正です"
+raise ArgumentError.new, "引数が不正です"
+
+err =  ArgumentError.new("引数が不正です")
+err
+=> #<ArgumentError: 引数が不正です>
+raise err
+=> ArgumentError (引数が不正です)
+
+raise "実行中にエラーが発生しました"
+- RuntimeError (実行中にエラーが発生しました)
+
+begin
+  1 / 0
+  p 1
+rescue
+  p 0
+end =>0
+
+rescueの後にelseをかくと例外が発生しなかったときensureアはどっちでも時効する
+
+begin
+  p 1
+rescue
+  p 0
+else
+  p 2
+ensure
+  p 3
+end
+1
+2
+3
+
+1/0 rescue p 1 =>1
+
+def foo
+ -1 / 0
+rescue
+p 1
+end
+foo =>1
+
+rescueは例外クラスを指定しないとStandarderrorとそのサブクラスが補足の対象となった
+
+Exception
+- ScriptErrpr 文法エラー
+  - SyntaxError
+- SgnalException 補足していないシグナルを受けた
+- StandardError　
+  - ArgumentError　引数の数が合わない、値が正しくない
+  - RuntimeError 特定の例外クラスに該当しないエラー、例外クラスを省略したraise
+  - NameError 未定義のローカルヘンスウや定数を参照
+    - NoMethodError 未定義メソッドよひだし
+  - ZeroDivisionError 整数に対す整数の0でじょさんを行った
+
+begin
+ 1/0
+rescue ZeroDivisionError => e
+ p e.backtrace
+end
+
+begin
+ 1/0
+rescue ZeroDivisionError
+ p $!.class
+ raise
+end
+=>ZeroDivisionError (divided by 0)
+
+begin
+ 1/0
+rescue ZeroDivisionError
+ p $!.class
+end=> 最後の例外を参照ZeroDivisionError
+
+# retry
+a = 0
+- 元に委ねず、自分で解決したいばあはretry再度beginを実行ensureは位階しか行われzん
+begin
+  b = 1 / a
+rescue ZeroDivisionError
+  a += 1
+  retry
+ensure
+  p b
+end => 1
+
+rescueは複数でっきるけど、際d世にマッチしたものしか実行されぬ
+begin
+  1/0
+rescue
+  p 1
+rescue ZeroDivisionError
+  p 2
+end => 1
+
+だんだん広くした方がええで
+# catchとthrow
+正常でも処理を抜けたいとき
+def foo
+  throw :exit
+end
+
+catch(:exit) {
+  foo
+  p 1
+}
+
+p 2
+
+# throw実行されると同名のラベルが指定されているcatchまで呼び出しスタックをたどり、ブロック内の後続処理をスキップする
+- throwにはラベル以外に値を引数でわたう
+- throwに私た値の戻り値とすることができます
+def bar
+  catch(:calc) do
+    throw :calc, 100
+  end
+end
+p bar　#=> 100
